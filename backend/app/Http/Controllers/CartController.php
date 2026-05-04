@@ -64,12 +64,12 @@ class CartController extends Controller
             'message' => '購物車已更新',
             'quantity' => $validated['quantity'],
             'product_id' => $id
-        ]);
+        ], 200);
     }
 
     public function destroy($id)
     {
         auth()->user()->carts()->detach($id);
-        return response()->json(['message' => '商品已從購物車移除']);
+        return response()->json(['message' => '商品已從購物車移除'], 200);
     }
 }

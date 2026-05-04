@@ -13,9 +13,9 @@ class WishlistController extends Controller
     public function index()
     {
         $wishlists = auth()->user()->wishlists()
-        ->with('product')
-        ->latest()
+        ->orderByPivot('created_at', 'desc')
         ->paginate(10);
+            
         return response()->json($wishlists);
     }
 
@@ -33,6 +33,6 @@ class WishlistController extends Controller
             'status' => 'success',
             'action' => $isAdded ? 'added' : 'removed',
             'message' => $isAdded ? '已加入收藏' : '已從收藏移除'
-        ]);
+        ], 200);
     }
 }

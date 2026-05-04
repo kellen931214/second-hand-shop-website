@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::query()->withAvg('reviews', 'rating');
+        $query = Product::query()->withAvg('reviews', 'rating')->where('stock', '>', 0);
     
         if ($request->filled('key_word')){
             $keyword = $request->input('key_word');
@@ -28,16 +28,15 @@ class ProductController extends Controller
     }
 
     public function show ($id){
-        $product = Product::with(['reviews' => function($query){
-            $query ->latest()->take(5);
-        }, 'reviews.user' ])->findOrFail($id);
+        $product = Product::with(['reviews' => function($query) {
+            $query->with('user')->latest()->take(5);
+        }])->findOrFail($id);
         $product->increment('view_count');
 
-        if (Auth::check()){
-            ProductView::updateOrCreate(
-                ['user_id' => Auth::id(), 'product_id' => $product->id],
-                ['viewed_at' => now()]
-            );
+        if (Auth::check()) {
+            auth()->user()->viewedProducts()->syncWithoutDetaching([
+                $product->id => ['updated_at' => now()]
+            ]);
         }
 
         return response()->json($product);
@@ -55,10 +54,10 @@ class ProductController extends Controller
     
     public function mostViewed()
     {
-        $product = Product::orderByDesc('view_count')
+        $products = Product::orderByDesc('view_count')
         ->take(10)
         ->get();
-        return response()->json($product);
+        return response()->json($products);
     }
 
     public function mostWished()
@@ -96,7 +95,7 @@ class ProductController extends Controller
                 'stock' => 'sometimes|required|integer|min:0',
             ]);
         $product->update($validated);
-        return response()->json($product);
+        return response()->json($product, 200);
     }
 
     public function destroy($id){

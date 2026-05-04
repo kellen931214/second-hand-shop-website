@@ -9,7 +9,9 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::withCount('products')->get();
+        $categories = Category::withCount(['products' => function ($query) {
+            $query->where('stock', '>', 0);
+        }])->get();
         
         return response()->json($categories);
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Product;
-// use App\Models\OrderItem; // 如果 store 裡是用關聯建立，這行通常可以不用引進來
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -50,11 +49,11 @@ class OrderController extends Controller
             // 注意：如果你有設定級聯刪除 (onDelete('cascade'))，這會連同 order_items 一起刪掉
             $order->delete();
 
-            return response()->json(['message' => '訂單已刪除，庫存已歸還']);
+            return response()->json(['message' => '訂單已刪除，庫存已歸還'], 200);
         });
     }
 
-    public function store(Request $request)
+public function store(Request $request)
     {
         $request->validate([
             'items' => 'required|array|min:1',
@@ -67,6 +66,7 @@ class OrderController extends Controller
                 $user = auth()->user();
                 $totalPrice = 0;
                 $orderItemsData = [];
+                $productIds = []; // 【新增】準備一個空陣列，用來收集這次購買的商品 ID
 
                 foreach ($request->items as $item) {
                     // lockForUpdate 會鎖定這行資料，直到 Transaction 結束
@@ -88,6 +88,9 @@ class OrderController extends Controller
                         'quantity' => $item['quantity'],
                         'price' => $product->price, 
                     ];
+
+                    // 【新增】將當前商品的 ID 存入收集陣列中
+                    $productIds[] = $product->id;
                 }
 
                 // 建立訂單主表
@@ -98,6 +101,9 @@ class OrderController extends Controller
 
                 // 建立訂單明細
                 $order->orderItems()->createMany($orderItemsData);
+
+                // 【新增】將已經結帳的商品，從使用者的購物車中移除
+                $user->carts()->detach($productIds);
 
                 return response()->json($order->load('orderItems.product'), 201);
             });

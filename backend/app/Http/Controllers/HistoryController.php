@@ -17,27 +17,6 @@ class HistoryController extends Controller
         return response()->json($history);
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'product_id' => 'required|exists:products,id'
-        ]);
-
-        $user = auth()->user();
-        $productId = $validated['product_id'];
-
-        $hasViewed = $user->viewedProducts()->where('product_id', $productId)->exists();
-
-        if ($hasViewed) {
-            $user->viewedProducts()->updateExistingPivot($productId, ['updated_at' => now()]);
-        } else {
-            $user->viewedProducts()->attach($productId);
-        }
-
-        return response()->json(['message' => '瀏覽紀錄已更新'], 200);
-    }
-
-
     public function destroy($productId)
     {
         auth()->user()->viewedProducts()->detach($productId);

@@ -8,6 +8,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\LikeController;
+use App\Http\Middleware\EnsureIsAdmin;
 
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
@@ -17,6 +19,7 @@ require __DIR__.'/auth.php';
 
 Route::get('/products/popular', [ProductController::class, 'popular']); 
 Route::get('/products/most-viewed', [ProductController::class, 'mostViewed']);
+Route::get('/products/most-wished', [ProductController::class, 'mostWished']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
@@ -30,11 +33,11 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/carts', [CartController::class, 'index']);
     Route::post('/carts', [CartController::class, 'store']);
+    Route::patch('/carts/{id}', [CartController::class, 'update']);
     Route::delete('/carts/{id}', [CartController::class, 'destroy']);   
 
-    Route::post('/wishlists', [App\Http\Controllers\WishlistController::class, 'store']);
-    Route::get('/wishlists', [App\Http\Controllers\WishlistController::class, 'index']);
-    Route::delete('/wishlists/{id}', [App\Http\Controllers\WishlistController::class, 'destroy']); 
+    Route::post('/wishlists/toggle', [WishlistController::class, 'toggle']);
+    Route::get('/wishlists', [WishlistController::class, 'index']);
 
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
@@ -45,12 +48,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/reviews/{id}', [ReviewController::class, 'update']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
     
-    Route::post('/reviews/{id}/toggle-like', [ReviewController::class, 'toggleLike']);
+    Route::post('/reviews/{id}/like', [LikeController::class, 'toggle']);
 
     Route::get('/history', [HistoryController::class, 'index']);
-    Route::post('/history', [HistoryController::class, 'store']); 
-    Route::delete('/history/{id}', [HistoryController::class, 'destroy']); 
-    Route::delete('/history-clear', [HistoryController::class, 'clearAll']); 
+    Route::post('/history', [HistoryController::class, 'store']);
+    Route::delete('/history/{productId}', [HistoryController::class, 'destroy']);
+    Route::delete('/history', [HistoryController::class, 'clearAll']);
 });
 
 

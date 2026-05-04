@@ -26,12 +26,12 @@ class ReviewController extends Controller
         ]);
     }
 
-public function store(Request $request, $productId)
+    public function store(Request $request, $productId)
     {
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048' // 最多 2MB
         ]);
 
         $product = Product::findOrFail($productId);
@@ -58,7 +58,7 @@ public function store(Request $request, $productId)
 
         return response()->json([
             'message' => '評價成功！',
-            'review' => $review->load('user:id,name') 
+            'data' => $review->load('user:id,name')
         ], 201);
     }
 
@@ -82,20 +82,23 @@ public function store(Request $request, $productId)
 
         return response()->json([
             'message' => '評價修改成功',
-            'review' => $review->load('user:id,name')
-        ]);
+            'data' => $review->load('user:id,name')
+        ], 200);
     }
 
     public function destroy($id)
     {
         $review = Review::findOrFail($id);
+        $user = auth()->user();
 
-        if ($review->user_id !== auth()->id() && $user->role !== 'admin') {
+        if ($review->user_id !== $user->id && $user->role !== 'admin') {
             return response()->json(['message' => '您沒有權限刪除此評價'], 403);
         }
-
+        if ($review->image_path){
+            Storage::disk('public')->delete($review->image_path);
+        }
         $review->delete();
 
-        return response()->json(['message' => '評價已刪除']);
+        return response()->json(['message' => '評價已刪除'], 200);
     }
 }

@@ -11,10 +11,15 @@ class EnsureIsAdmin
     /**
      * Handle an incoming request.
      *
-     * @param  Closure(Request): (Response)  $next
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        return $next($request);
+        // 假設你的 users table 有一個 'role' 欄位
+        if ($request->user() && $request->user()->role === 'admin') {
+            return $next($request);
+        }
+
+        return response()->json(['message' => 'Unauthorized.'], 403);
     }
 }
