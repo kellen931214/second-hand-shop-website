@@ -33,4 +33,11 @@ class Product extends Model
     return $this -> hasMany(Review::class);
     }
 
+    public function viewedByUsers()
+{
+
+    return $this->belongsToMany(User::class, 'product_views')
+                ->withTimestamps()
+                ->withPivot('updated_at'); 
+}
 }

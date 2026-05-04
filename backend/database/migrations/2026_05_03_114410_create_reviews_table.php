@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->unsignedTinyInteger('rating')->default(5);// 1 to 5
             $table->text('comment')->nullable();
+            $table->integer('likes_count')->default(0);
             $table->string('image_path')->nullable();
             $table->timestamps();
         });

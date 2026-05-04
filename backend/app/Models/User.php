@@ -50,5 +50,15 @@ class User extends Authenticatable
         return $this -> belongsToMany(Product::class, 'carts')->withPivot('quantity');
     }
 
+    public function likedReviews()
+    {
+        return $this->belongsToMany(Review::class, 'review_likes')->withTimestamps();
+    }
+
+    public function viewedProducts()
+    {
+        return $this->belongsToMany(Product::class, 'product_views')
+                    ->withTimestamps();
+    }
 
 }

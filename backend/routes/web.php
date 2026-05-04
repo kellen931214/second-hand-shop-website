@@ -1,43 +1,61 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\HistoryController;
 
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
 
 require __DIR__.'/auth.php';
-Route::get('/products/popular', [App\Http\Controllers\ProductController::class, 'popular']); 
-Route::get('/products/most-viewed', [App\Http\Controllers\ProductController::class, 'mostViewed']);
-Route::get('/products',[App\Http\Controllers\ProductController::class,'index']);
-Route::get('/products/{id}',[App\Http\Controllers\ProductController::class,'show']);
-Route::get('/categories',[App\Http\Controllers\CategoryController::class,'index']);
-Route::get('/categories/{id}/products',[App\Http\Controllers\CategoryController::class,'products']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/carts', [App\Http\Controllers\CartController::class, 'store']);
-    Route::get('/carts', [App\Http\Controllers\CartController::class, 'index']);
-    Route::delete('/carts/{id}', [App\Http\Controllers\CartController::class, 'destroy']);
+Route::get('/products/popular', [ProductController::class, 'popular']); 
+Route::get('/products/most-viewed', [ProductController::class, 'mostViewed']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{id}', [ProductController::class, 'show']);
 
-    Route::post('/orders', [App\Http\Controllers\OrderController::class, 'store']);
-    Route::get('/orders', [App\Http\Controllers\OrderController::class, 'index']);
-    Route::delete('/orders/{id}', [App\Http\Controllers\OrderController::class, 'destroy']);
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{id}/products', [CategoryController::class, 'show']);
+
+Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
+
+
+Route::middleware('auth')->group(function () {
+    
+    Route::get('/carts', [CartController::class, 'index']);
+    Route::post('/carts', [CartController::class, 'store']);
+    Route::delete('/carts/{id}', [CartController::class, 'destroy']);   
 
     Route::post('/wishlists', [App\Http\Controllers\WishlistController::class, 'store']);
     Route::get('/wishlists', [App\Http\Controllers\WishlistController::class, 'index']);
-    Route::delete('/wishlists/{id}', [App\Http\Controllers\WishlistController::class, 'destroy']);
+    Route::delete('/wishlists/{id}', [App\Http\Controllers\WishlistController::class, 'destroy']); 
 
-    Route::post('/reviews', [App\Http\Controllers\ReviewController::class, 'store']);
-    Route::get('/reviews', [App\Http\Controllers\ReviewController::class, 'index']);
-    Route::delete('/reviews/{id}', [App\Http\Controllers\ReviewController::class, 'destroy']);
-    Route::put('/reviews/{id}', [App\Http\Controllers\ReviewController::class, 'update']);
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 
-    Route::get('/orders/{order_id}', [App\Http\Controllers\OrderController::class, 'show']);
+    Route::post('/products/{productId}/reviews', [ReviewController::class, 'store']);
+    Route::put('/reviews/{id}', [ReviewController::class, 'update']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+    
+    Route::post('/reviews/{id}/toggle-like', [ReviewController::class, 'toggleLike']);
+
+    Route::get('/history', [HistoryController::class, 'index']);
+    Route::post('/history', [HistoryController::class, 'store']); 
+    Route::delete('/history/{id}', [HistoryController::class, 'destroy']); 
+    Route::delete('/history-clear', [HistoryController::class, 'clearAll']); 
 });
 
 
-Route::middleware(['auth:sanctum', EnsureIsAdmin::class])->group(function () {
-    Route::post('/products', [App\Http\Controllers\ProductController::class, 'store']);
-    Route::put('/products/{id}', [App\Http\Controllers\ProductController::class, 'update']);
-    Route::delete('/products/{id}', [App\Http\Controllers\ProductController::class, 'destroy']);
+Route::middleware(['auth', EnsureIsAdmin::class])->group(function () {
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 });

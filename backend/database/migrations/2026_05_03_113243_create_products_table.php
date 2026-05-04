@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->integer('stock')->default(1);
             $table->unsignedInteger('view_count')->default(0);
+            
             $table->timestamps();
         });
     }
