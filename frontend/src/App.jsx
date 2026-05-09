@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage'; 
 import LoginPage from './pages/LoginPage';
@@ -14,6 +15,7 @@ import AdminProductListPage from './pages/AdminProductListPage';
 
 function App() {
   return (
+    <ThemeProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
@@ -29,6 +31,7 @@ function App() {
         <Route path="/create-product" element={<ProductFormPage />} />
         <Route path="/admin/products/edit/:id" element={<ProductFormPage />} />
       </Routes>
+    </ThemeProvider>
   );
 }
 
