@@ -5,16 +5,49 @@ const RegisterPage = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    // 1. 新增確認密碼的狀態
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    
+    const [passwordError, setPasswordError] = useState('');
+
+    const validatePassword = (pwd) => {
+        if (pwd.length < 8) return "密碼長度至少需要 8 個字元";
+        if (!/[a-z]/.test(pwd)) return "密碼必須包含至少一個小寫字母";
+        if (!/[A-Z]/.test(pwd)) return "密碼必須包含至少一個大寫字母";
+        if (!/[0-9]/.test(pwd)) return "密碼必須包含至少一個數字";
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) return "密碼必須包含至少一個特殊符號";
+        return ""; 
+    };
+
+    const handlePasswordChange = (e) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        
+        if (newPassword.length > 0) {
+            setPasswordError(validatePassword(newPassword));
+        } else {
+            setPasswordError('');
+        }
+    };
 
     const handleRegister = async (e) => {
         e.preventDefault();
         setErrorMessage('');
 
+        // 🌟 4. 送出前攔截：檢查密碼格式是否完全正確
+        const currentPasswordError = validatePassword(password);
+        if (currentPasswordError !== "") {
+            setPasswordError(currentPasswordError);
+            return; // 終止執行，不打 API
+        }
+
+        // 🌟 5. 送出前攔截：檢查兩次輸入是否一致
+        if (password !== passwordConfirmation) {
+            setErrorMessage('兩次輸入的密碼不一致！');
+            return; // 終止執行，不打 API
+        }
+
         try {
-            // 2. 傳送給後端的欄位名稱必須是 password_confirmation (Laravel 的慣例)
             const response = await register({ 
                 name, 
                 email, 
@@ -24,7 +57,6 @@ const RegisterPage = () => {
             console.log("註冊成功！", response.data);
             window.location.href = "/";
         } catch (error) {
-            // 這裡會把後端傳回來的錯誤訊息顯示在畫面上
             setErrorMessage(error.response?.data?.message || '註冊失敗，請稍後再試');
         }
     };
@@ -40,13 +72,12 @@ const RegisterPage = () => {
                     </div>
                 )}
 
-                {/* 姓名欄位 */}
+                {/* 姓名與信箱欄位保持不變 */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-gray-600">姓名</label>
                     <input type="text" required onChange={(e) => setName(e.target.value)} placeholder="請輸入姓名" className="w-full rounded-lg border border-gray-300 px-4 py-2.5" />
                 </div>
 
-                {/* 信箱欄位 */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-gray-600">電子信箱</label>
                     <input type="email" required onChange={(e) => setEmail(e.target.value)} placeholder="請輸入信箱" className="w-full rounded-lg border border-gray-300 px-4 py-2.5" />
@@ -55,15 +86,29 @@ const RegisterPage = () => {
                 {/* 密碼欄位 */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-gray-600">密碼</label>
-                    <input type="password" required onChange={(e) => setPassword(e.target.value)} placeholder="請輸入密碼" className="w-full rounded-lg border border-gray-300 px-4 py-2.5" />
+                    <input 
+                        type="password" 
+                        required 
+                        value={password}
+                        onChange={handlePasswordChange} // 🌟 改用我們寫好的處理函式
+                        placeholder="至少 8 碼，包含大小寫、數字與符號" 
+                        className={`w-full rounded-lg border px-4 py-2.5 focus:outline-none ${
+                            passwordError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-gray-500'
+                        }`} 
+                    />
+                    {/* 🌟 條件渲染：密碼格式有錯時，在這裡顯示紅色小字 */}
+                    {passwordError && (
+                        <span className="text-xs font-medium text-red-500">{passwordError}</span>
+                    )}
                 </div>
 
-                {/* 3. 新增確認密碼輸入框 */}
+                {/* 確認密碼欄位保持不變 */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-gray-600">確認密碼</label>
                     <input 
                         type="password" 
                         required 
+                        value={passwordConfirmation}
                         onChange={(e) => setPasswordConfirmation(e.target.value)} 
                         placeholder="請再次輸入密碼" 
                         className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:border-gray-500"

@@ -19,13 +19,21 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    public function show($id) 
+    public function show($id)
     {
-        $order = auth()->user()->orders()
-            ->with(['orderItems.product'])
-            ->findOrFail($id); 
+        $user = auth()->user();
 
-        return response()->json($order);    
+        $order = $user->orders()->with(['orderItems.product.reviews' => function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        }])->findOrFail($id);
+
+        $order->orderItems->each(function($item) {
+            $item->is_reviewed = $item->product->reviews->isNotEmpty();
+            
+            $item->product->makeHidden('reviews');
+        });
+
+        return response()->json($order);
     }
 
     public function destroy($id)
@@ -53,43 +61,53 @@ class OrderController extends Controller
         });
     }
 
-public function store(Request $request)
+    public function store(Request $request)
     {
-        $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
-
+        // 🌟 此處不再需要 validate 'items'，因為我們會直接從資料庫讀取
         try {
-            return DB::transaction(function () use ($request) {
+            return DB::transaction(function () {
                 $user = auth()->user();
+                
+                // 📖 指令：$user->carts()->get()
+                // 用途：從多對多關聯中抓取該使用者購物車內的所有商品。
+                $cartItems = $user->carts()->get();
+
+                // 邏輯檢查：如果購物車空空如也，直接拋出異常
+                if ($cartItems->isEmpty()) {
+                    throw new \Exception("購物車是空的，無法下單。");
+                }
+
                 $totalPrice = 0;
                 $orderItemsData = [];
-                $productIds = []; // 【新增】準備一個空陣列，用來收集這次購買的商品 ID
+                $productIds = [];
 
-                foreach ($request->items as $item) {
-                    // lockForUpdate 會鎖定這行資料，直到 Transaction 結束
-                    $product = Product::lockForUpdate()->findOrFail($item['product_id']);
+                foreach ($cartItems as $item) {
+                    // 📖 指令：Product::lockForUpdate()->findOrFail($item->id)
+                    // 參數：$item->id 是從購物車抓出的商品主鍵。
+                    // 用途：悲觀鎖。確保在計算金額與扣庫存時，沒有其他程序能修改這條商品資料。
+                    $product = Product::lockForUpdate()->findOrFail($item->id);
+                    
+                    // 🌟 參數：$item->pivot->quantity
+                    // 用途：從中間表（pivot）取得該商品在購物車裡的數量。
+                    $quantity = $item->pivot->quantity;
 
-                    if ($product->stock < $item['quantity']) {
-                        // 這裡拋出 Exception 會觸發 Transaction 回滾
+                    if ($product->stock < $quantity) {
                         throw new \Exception("商品 {$product->name} 庫存不足。");
                     }
 
-                    $subtotal = $product->price * $item['quantity'];
+                    $subtotal = $product->price * $quantity;
                     $totalPrice += $subtotal;
 
-                    // 執行庫存扣除
-                    $product->decrement('stock', $item['quantity']);
+                    // 📖 指令：decrement('stock', $quantity)
+                    // 用途：直接在資料庫執行「庫存 = 庫存 - 數量」，防止程式運算誤差。
+                    $product->decrement('stock', $quantity);
 
                     $orderItemsData[] = [
                         'product_id' => $product->id,
-                        'quantity' => $item['quantity'],
+                        'quantity' => $quantity,
                         'price' => $product->price, 
                     ];
 
-                    // 【新增】將當前商品的 ID 存入收集陣列中
                     $productIds[] = $product->id;
                 }
 
@@ -102,13 +120,14 @@ public function store(Request $request)
                 // 建立訂單明細
                 $order->orderItems()->createMany($orderItemsData);
 
-                // 【新增】將已經結帳的商品，從使用者的購物車中移除
+                // 📖 指令：$user->carts()->detach($productIds)
+                // 參數：$productIds 是剛才收集的所有商品 ID 陣列。
+                // 用途：清空「已經變成訂單」的購物車內容。
                 $user->carts()->detach($productIds);
 
                 return response()->json($order->load('orderItems.product'), 201);
             });
         } catch (\Exception $e) {
-            // 捕捉剛才拋出的庫存不足或其他錯誤，回傳給前端
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

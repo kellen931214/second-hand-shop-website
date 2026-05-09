@@ -91,6 +91,18 @@ const Navbar = () => {
                   {user.role === 'admin' && (
                     <>
                       <div className="hidden md:block h-5 w-px bg-slate-200"></div>
+                      
+                      {/* 🌟 1. 管理員的商品列表入口 */}
+                      <Link to="/admin/products" className="hidden md:flex items-center gap-1 text-sm text-indigo-600 font-bold hover:text-indigo-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        商品管理
+                      </Link>
+
+                      <div className="hidden md:block h-5 w-px bg-slate-200"></div>
+
+                      {/* 🌟 2. 發布商品入口 (維持不變，指向新增模式) */}
                       <Link to="/create-product" className="hidden md:flex items-center gap-1 text-sm text-indigo-600 font-bold hover:text-indigo-700 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

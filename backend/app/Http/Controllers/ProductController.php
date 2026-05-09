@@ -11,8 +11,11 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::query()->withAvg('reviews', 'rating')->where('stock', '>', 0);
-    
+        $query = Product::query()
+            ->withAvg('reviews', 'rating')
+            ->withCount('wishlistsByUsers') // 為了讓「最多收藏」能排序
+            ->where('stock', '>', 0);
+
         if ($request->filled('key_word')){
             $keyword = $request->input('key_word');
             $query->where('name', 'like', "%{$keyword}%");
@@ -23,14 +26,36 @@ class ProductController extends Controller
             $query->where('category_id', $categoryId);
         }
 
-        return response()->json($query->paginate(12));
+        if ($request->filled('sort')) {
+            $sort = $request->input('sort');
 
+            switch ($sort) {
+                case 'rating': 
+                    $query->orderByDesc('reviews_avg_rating');
+                    break;
+                case 'views':
+                    $query->orderByDesc('view_count');
+                    break;
+                case 'wishes': 
+                    $query->orderByDesc('wishlists_by_users_count');
+                    break;
+                case 'newest': 
+                default:
+                    $query->latest();
+                    break;
+            }
+        } else {
+            // 預設排序：最新上架
+            $query->latest();
+        }
+
+        return response()->json($query->paginate(12));
     }
 
     public function show ($id){
         $product = Product::with(['reviews' => function($query) {
             $query->with('user')->latest()->take(5);
-        }])->findOrFail($id);
+        }])->withAvg('reviews', 'rating')->findOrFail($id);
         $product->increment('view_count');
 
         if (Auth::check()) {

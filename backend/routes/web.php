@@ -10,12 +10,17 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\LikeController;
 use App\Http\Middleware\EnsureIsAdmin;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
 
 require __DIR__.'/auth.php';
+Route::middleware('auth')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
 
 Route::get('/products/popular', [ProductController::class, 'popular']); 
 Route::get('/products/most-viewed', [ProductController::class, 'mostViewed']);

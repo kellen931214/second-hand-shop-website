@@ -16,35 +16,40 @@ class CartController extends Controller
         return response()->json($cartItems);
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id'
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1' // 🌟 1. 允許接收數量
         ]);
 
-        $product = Product::findOrFail($validated['product_id']);
-        if ($product->stock < 1){
+        $productId = $validated['product_id'];
+        $quantity = $validated['quantity'];
+
+        $product = Product::findOrFail($productId);
+        
+        if ($product->stock < $quantity) {
             return response()->json(['message' => '商品庫存不足'], 400);
         }
 
         $user = auth()->user();
-        $productId = $validated['product_id']; 
-        
-        $isExists = $user->carts()->where('product_id', $productId)->exists();
-        
-        if (!$isExists) {
-            $user->carts()->attach($productId, ['quantity' => 1]);
+        $cartItem = $user->carts()->where('product_id', $productId)->first();
+
+        if (!$cartItem) {
+            $user->carts()->attach($productId, ['quantity' => $quantity]);
             $message = '商品已加入購物車';
-            $status = 201; 
         } else {
-            $message = '商品已在購物車中';
-            $status = 200;
+            $newQuantity = $cartItem->pivot->quantity + $quantity;
+            
+            if ($newQuantity > $product->stock) {
+                return response()->json(['message' => '超過商品庫存上限'], 400);
+            }
+
+            $user->carts()->updateExistingPivot($productId, ['quantity' => $newQuantity]);
+            $message = '已增加購物車內的商品數量';
         }
 
-        return response()->json([
-            'message' => $message,
-            'product_id' => $productId
-        ], $status); 
+        return response()->json(['message' => $message, 'product_id' => $productId], 200);
     }
 
     public function update(Request $request, $id)
