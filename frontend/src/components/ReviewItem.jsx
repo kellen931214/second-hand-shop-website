@@ -66,7 +66,7 @@ const ReviewItem = ({ review, onToggleLike, onDelete, onUpdate, currentUserId })
             <textarea 
               value={editComment}
               onChange={(e) => setEditComment(e.target.value)}
-              className="w-full text-sm border border-slate-300 rounded p-2 bg-white focus:outline-none focus:border-[#ee4d2d] min-h-[80px]"
+              className="w-full text-sm border border-slate-300 rounded p-2 bg-white focus:outline-none focus:border-[#ee4d2d] min-h-20"
               placeholder="修改您的評價..."
             />
             
