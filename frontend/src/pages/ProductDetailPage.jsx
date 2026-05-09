@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getProduct, toggleWishlist, getProductReviews } from '../api/productApi';
-import { toggleReviewLike } from '../api/reviewApi'; // 🌟 新增：評價點讚 API
+import { toggleReviewLike, deleteReview, updateReview } from '../api/reviewApi'; 
 import { addToCart } from '../api/cartApi'; 
+// 🌟 1. 引入獲取使用者資訊的 API (請確保你的 authApi.js 裡有定義這個向 GET /api/user 拿資料的函式)
+import { getMe } from '../api/authApi'; 
 import ReviewItem from '../components/ReviewItem';
 import QuantitySelector from '../components/QuantitySelector';
 
@@ -14,19 +16,21 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
-  
-  // 🌟 1. 新增：控制購買數量的狀態
   const [qty, setQty] = useState(1);
+
+  // 🌟 2. 新增 state：用來儲存目前登入的使用者資訊
+  const [currentUser, setCurrentUser] = useState(null);
 
   const [reviews, setReviews] = useState([]);
   const [reviewPage, setReviewPage] = useState(1);
   const [hasMoreReviews, setHasMoreReviews] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [reviewStats, setReviewStats] = useState({ average: 0, total: 0 });
-const [isLiked, setIsLiked] = useState(false); 
-const [likeCount, setLikeCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false); 
+  const [likeCount, setLikeCount] = useState(0);
 
   useEffect(() => {
+    // 獲取商品資料
     const fetchProduct = async () => {
       try {
         const response = await getProduct(id);
@@ -48,71 +52,125 @@ const [likeCount, setLikeCount] = useState(0);
         setLoading(false);
       }
     };
+
+    // 🌟 3. 新增邏輯：獲取目前登入的使用者
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await getMe();
+        setCurrentUser(response.data); // 將取得的使用者資料存入 state
+      } catch (error) {
+        // 如果抓不到 (報 401)，代表是未登入的訪客，我們直接忽略，currentUser 會維持 null
+      }
+    };
+
     fetchProduct();
+    fetchCurrentUser(); // 🌟 執行獲取使用者身分
   }, [id, navigate]);
 
-// 🌟 處理評價點讚
-const handleToggleReviewLike = async (reviewId) => {
-  // 1. 備份舊資料，失敗時回滾 (Rollback) 用
-  const previousReviews = [...reviews];
+  const handleToggleReviewLike = async (reviewId) => {
+    const previousReviews = [...reviews];
+    setReviews(prev => prev.map(review => {
+      if (review.id === reviewId) {
+        const currentlyLiked = review.is_liked_by_user || false;
+        return {
+          ...review,
+          is_liked_by_user: !currentlyLiked,
+          likes_count: currentlyLiked ? (review.likes_count - 1) : (review.likes_count + 1)
+        };
+      }
+      return review;
+    }));
 
-  // 2. 指令：setReviews。用途：立即更新本地狀態。
-  setReviews(prev => prev.map(review => {
-    if (review.id === reviewId) {
-      // 參數說明：is_liked_by_user 代表當前使用者是否點過讚
-      const currentlyLiked = review.is_liked_by_user || false;
-      return {
-        ...review,
-        is_liked_by_user: !currentlyLiked,
-        // 參數說明：若已點過則 -1，沒點過則 +1
-        likes_count: currentlyLiked ? (review.likes_count - 1) : (review.likes_count + 1)
-      };
+    try {
+      await toggleReviewLike(reviewId); 
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert("請先登入後才能點讚評價喔！");
+        navigate('/login');
+      }
+      setReviews(previousReviews);
     }
-    return review;
-  }));
+  };
 
-  try {
-    // 呼叫 API。參數：評價 ID
-    await toggleReviewLike(reviewId); 
-  } catch (error) {
-    // 3. 失敗：恢復原始資料並提示
-    setReviews(previousReviews);
-    alert("操作失敗，請確認是否已登入");
-  }
-};
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm("確定要刪除這則評價嗎？")) return;
+
+    try {
+      await deleteReview(reviewId); 
+      
+      setReviews(prev => prev.filter(review => review.id !== reviewId));
+      setReviewStats(prev => ({ ...prev, total: prev.total - 1 }));
+      alert("評價已刪除！");
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert("請先登入！");
+        navigate('/login');
+      } else if (error.response?.status === 403) {
+        alert("您沒有權限刪除此評價！"); 
+      } else {
+        alert("刪除失敗，請稍後再試");
+      }
+    }
+  };
+
+  const handleUpdateReview = async (reviewId, newRating, newComment) => {
+    try {
+      const response = await updateReview(reviewId, { rating: newRating, comment: newComment });
+      
+      setReviews(prev => prev.map(review => 
+        review.id === reviewId ? response.data.data : review
+      ));
+      alert("評價更新成功！");
+      return true; 
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert("請先登入！");
+        navigate('/login');
+      } else if (error.response?.status === 403) {
+        alert("您沒有權限修改此評價！");
+      } else {
+        alert(error.response?.data?.message || "更新失敗");
+      }
+      return false;
+    }
+  };
   
-  // 🌟 2. 修改：將選擇的數量 qty 傳給 API
   const handleAddToCart = async () => {
     setIsAdding(true);
     try {
-      // 這裡對應你修改後的 addToCart(productId, quantity)
       const response = await addToCart(product.id, qty);
       alert(response.data.message);
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "加入購物車失敗，請先登入";
-      alert(errorMsg);
+      if (error.response?.status === 401) {
+        alert("請先登入後才能將商品加入購物車喔！");
+        navigate('/login');
+      } else {
+        alert(error.response?.data?.message || "加入購物車失敗");
+      }
     } finally {
       setIsAdding(false);
     }
   };
 
-    const handleToggleWishlist = async () => {
+  const handleToggleWishlist = async () => {
     try {
-        const response = await toggleWishlist(product.id); // 呼叫 API
-        
-        // 🌟 2. 根據目前狀態進行加減
-        if (isLiked) {
-        setLikeCount(prev => prev - 1); // 如果原本是喜歡，按完後人數 -1
-        } else {
-        setLikeCount(prev => prev + 1); // 如果原本不喜歡，按完後人數 +1
-        }
-        
-        setIsLiked(!isLiked); // 切換愛心顏色狀態
-        alert(response.data.message);
+      const response = await toggleWishlist(product.id);
+      if (isLiked) {
+        setLikeCount(prev => prev - 1);
+      } else {
+        setLikeCount(prev => prev + 1);
+      }
+      setIsLiked(!isLiked);
+      alert(response.data.message);
     } catch (error) {
-        alert("請先登入才能收藏商品喔！");
+      if (error.response?.status === 401) {
+        alert("請先登入後才能收藏商品喔！");
+        navigate('/login');
+      } else {
+        alert("操作失敗，請稍後再試");
+      }
     }
-    };
+  };
 
   const handleLoadMoreReviews = async () => {
     setIsLoadingReviews(true);
@@ -174,10 +232,8 @@ const handleToggleReviewLike = async (reviewId) => {
                 onClick={handleToggleWishlist} 
                 className="flex items-center gap-2 group transition-all duration-300"
                 >
-                    {/* 🌟 向量愛心圖示 */}
                     <svg 
                         xmlns="http://www.w3.org/2000/svg" 
-                        // 動態切換填充色與邊框色
                         fill={isLiked ? "#ee4d2d" : "none"} 
                         viewBox="0 0 24 24" 
                         strokeWidth="1.5" 
@@ -192,8 +248,6 @@ const handleToggleReviewLike = async (reviewId) => {
                         d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" 
                         />
                     </svg>
-
-                    {/* 數量顯示 */}
                     <span className={`text-sm font-medium transition-colors ${
                         isLiked ? 'text-[#ee4d2d]' : 'text-slate-500'
                     }`}>
@@ -221,7 +275,6 @@ const handleToggleReviewLike = async (reviewId) => {
               <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{product.description || "賣家未提供商品描述。"}</p>
             </div>
 
-            {/* 🌟 3. 新增：數量選擇器區塊 */}
             <QuantitySelector 
               qty={qty} 
               setQty={setQty} 
@@ -250,6 +303,10 @@ const handleToggleReviewLike = async (reviewId) => {
                   key={review.id} 
                   review={review} 
                   onToggleLike={handleToggleReviewLike} 
+                  onDelete={handleDeleteReview}       
+                  onUpdate={handleUpdateReview} 
+                  // 🌟 4. 將當前使用者的 ID 傳給子元件！
+                  currentUserId={currentUser?.id} 
                 />
               ))
             ) : (
