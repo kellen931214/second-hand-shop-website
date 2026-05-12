@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: `${import.meta.env.VITE_BACKEND_API_BASE}/api`,
+    baseURL: `${import.meta.env.VITE_BACKEND_API_BASE}`,
     withCredentials: true, 
     withXSRFToken: true,
     headers: {
