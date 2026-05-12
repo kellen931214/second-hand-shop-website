@@ -69,7 +69,7 @@ const HistoryPage = () => {
         <header className="mb-8 border-b border-slate-200 dark:border-slate-700 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
             <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-              <span className="text-indigo-500">🕒</span> 最近瀏覽過
+              最近瀏覽過
             </h1>
             <p className="text-sm text-slate-500 dark:text-gray-400 mt-2 font-medium">
               共 {pagination.total} 筆紀錄

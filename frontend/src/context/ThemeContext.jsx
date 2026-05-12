@@ -5,7 +5,6 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(false);
 
-  // 初始化主題從 localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
@@ -17,7 +16,6 @@ export const ThemeProvider = ({ children }) => {
     }
   }, []);
 
-  // 切換主題
   const toggleTheme = () => {
     setIsDark(prev => {
       const newValue = !prev;

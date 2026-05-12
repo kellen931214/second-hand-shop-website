@@ -137,7 +137,6 @@ const SearchPage = () => {
               </div>
             </header>
 
-            {/* 🌟 2. 判斷邏輯：使用 LoadingSpinner 替換原本的手寫 HTML */}
             {loading ? (
               <LoadingSpinner message="載入商品中..." />
             ) : (

@@ -28,7 +28,6 @@ const ProductDetailPage = () => {
   const [likeCount, setLikeCount] = useState(0);
 
   useEffect(() => {
-    // 獲取商品資料
     const fetchProduct = async () => {
       try {
         const response = await getProduct(id);

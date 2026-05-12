@@ -18,7 +18,6 @@ const HomePage = () => {
   const [highlyRated, setHighlyRated] = useState([]);
   const [mostWished, setMostWished] = useState([]);
   const [mostViewed, setMostViewed] = useState([]);
-  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,13 +37,14 @@ const HomePage = () => {
         setMostWished(wishedRes.data || []);
         setMostViewed(viewedRes.data || []);
 
-        const defaultIcons = ['📚', '💻', '🪥', '👕', '🚲'];
+        const defaultIcons = ['📚', '💻', '🛋️', '👕', '⛹️', '🍽️'];
         const defaultColors = [
           'bg-indigo-500/10 text-indigo-600', 
           'bg-slate-500/10 text-slate-600', 
           'bg-blue-500/10 text-blue-600', 
           'bg-slate-500/10 text-slate-500', 
-          'bg-cyan-500/10 text-cyan-600'
+          'bg-cyan-500/10 text-cyan-600',
+          'bg-orange-500/10 text-orange-600'
         ];
         
         const formattedCategories = categoriesRes.data.map((cat, index) => ({
@@ -86,6 +86,26 @@ return (
           ) : (
             <>
               <section className="mb-16 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/60 dark:border-slate-700/60 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+                
+                <div className="p-5 border-b border-white/40 dark:border-slate-700/40 bg-white/20 dark:bg-slate-700/20">
+                  <h2 className="text-slate-800 dark:text-gray-300 text-xs font-black tracking-[0.2em] uppercase opacity-60">Category Navigator</h2>
+                </div>
+                
+                <div className="grid grid-rows-2 grid-flow-col overflow-x-auto no-scrollbar justify-start auto-cols-[130px]">
+                  {categories.map((cat) => (
+                    <Link 
+                      key={cat.id} 
+                      to={`/search?category=${cat.name}`}
+                      className="w-full h-35 flex flex-col items-center justify-center border-r border-b border-slate-100/50 dark:border-slate-700/50 hover:bg-white/40 dark:hover:bg-slate-700/40 transition-all group py-4"
+                    >
+                      <div className={`w-16 h-16 ${cat.color} rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                        <span className="text-3xl">{cat.icon}</span>
+                      </div>
+                      <span className="text-[13px] text-slate-700 dark:text-gray-300 font-bold">{cat.name}</span>
+                    </Link>
+                  ))}
+                </div>
+
               </section>
 
               <ProductSection 

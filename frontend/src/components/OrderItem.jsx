@@ -10,16 +10,14 @@ const OrderItem = ({ order, onClick }) => {
       onClick={onClick}
       className="bg-white rounded-sm shadow-sm border border-slate-100 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
     >
-      {/* 訂單標頭 */}
       <div className="px-4 py-3 border-b border-slate-50 flex justify-between bg-[#fafafa]">
         <span className="text-sm font-bold text-slate-600">訂單編號：#{order.id}</span>
         <span className="text-sm text-[#ee4d2d] font-medium">查看詳情 ❯</span>
       </div>
 
-      {/* 商品預覽區 */}
       <div className="divide-y divide-slate-50">
         {previewItems.map(item => {
-          const product = item.product || item; // 處理不同的資料格式
+          const product = item.product || item; 
           return (
             <div key={item.id} className="p-4 flex gap-4 items-center">
               <img src={product.image_url} alt="" className="w-16 h-16 object-cover border" />
