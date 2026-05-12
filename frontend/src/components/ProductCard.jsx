@@ -9,19 +9,18 @@ const ProductCard = ({ product }) => {
     };
 
     return (
-
         <div className="bg-white rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-200 hover:-translate-y-1 flex flex-col border border-gray-100">
             <Link to={`/products/${product.id}`} className="flex flex-col h-full text-inherit no-underline">
                 
-                <div className="relative w-full  aspect-square bg-gray-50">
+                <div className="relative w-full h-48 sm:h-56 bg-white shrink-0 overflow-hidden flex items-center justify-center p-2">
                     <img 
                         src={product.image_url || 'https://via.placeholder.com/300x300?text=No+Image'} 
                         alt={product.name} 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain object-center mix-blend-multiply"
                     />
                     
                     {product.stock <= 0 && (
-                        <div className="absolute top-2 right-2 bg-black/70 text-white px-3 py-1 text-sm font-bold rounded-full tracking-wider">
+                        <div className="absolute top-2 right-2 bg-black/70 text-white px-3 py-1 text-sm font-bold rounded-full tracking-wider z-10">
                             已售完
                         </div>
                     )}
