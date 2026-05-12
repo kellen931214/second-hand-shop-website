@@ -1,6 +1,5 @@
 import axiosInstance from './axiosInstance';
 
-// 取得當前登入使用者的訂單列表
 export const getOrders = () => axiosInstance.get('/orders');
 
 export const createReview = (productId, formData) => {
