@@ -20,7 +20,7 @@ class CartController extends Controller
     {
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1' // 🌟 1. 允許接收數量
+            'quantity' => 'required|integer|min:1' // 
         ]);
 
         $productId = $validated['product_id'];

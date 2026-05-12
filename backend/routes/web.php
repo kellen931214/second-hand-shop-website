@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request; 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
@@ -9,18 +10,20 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\AIController; 
 use App\Http\Middleware\EnsureIsAdmin;
-use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
 
 require __DIR__.'/auth.php';
+
 Route::middleware('auth')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::post('/ai/query-products', [AIController::class, 'askAboutProducts']);
 
 Route::get('/products/popular', [ProductController::class, 'popular']); 
 Route::get('/products/most-viewed', [ProductController::class, 'mostViewed']);
@@ -32,7 +35,6 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}/products', [CategoryController::class, 'show']);
 
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
-
 
 Route::middleware('auth')->group(function () {
     
@@ -52,7 +54,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/{productId}/reviews', [ReviewController::class, 'store']);
     Route::put('/reviews/{id}', [ReviewController::class, 'update']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
-    
     Route::post('/reviews/{id}/like', [LikeController::class, 'toggle']);
 
     Route::get('/history', [HistoryController::class, 'index']);
@@ -60,7 +61,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/history/{productId}', [HistoryController::class, 'destroy']);
     Route::delete('/history', [HistoryController::class, 'clearAll']);
 });
-
 
 Route::middleware(['auth', EnsureIsAdmin::class])->group(function () {
     Route::post('/products', [ProductController::class, 'store']);

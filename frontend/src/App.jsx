@@ -13,6 +13,9 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import ProductFormPage from './pages/ProductFormPage';
 import AdminProductListPage from './pages/AdminProductListPage';
 
+// 1. 記得匯入你的 AI 小幫手組件
+import AIChatAssistant from './components/AIChatAssistant'; 
+
 function App() {
   return (
     <ThemeProvider>
@@ -31,6 +34,8 @@ function App() {
         <Route path="/create-product" element={<ProductFormPage />} />
         <Route path="/admin/products/edit/:id" element={<ProductFormPage />} />
       </Routes>
+      <AIChatAssistant />
+      
     </ThemeProvider>
   );
 }
