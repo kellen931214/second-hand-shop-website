@@ -4,7 +4,6 @@ import Navbar from '../components/Navbar';
 import { getProduct, toggleWishlist, getProductReviews } from '../api/productApi';
 import { toggleReviewLike, deleteReview, updateReview } from '../api/reviewApi'; 
 import { addToCart } from '../api/cartApi'; 
-// 🌟 1. 引入獲取使用者資訊的 API (請確保你的 authApi.js 裡有定義這個向 GET /api/user 拿資料的函式)
 import { getMe } from '../api/authApi'; 
 import ReviewItem from '../components/ReviewItem';
 import QuantitySelector from '../components/QuantitySelector';
@@ -18,7 +17,6 @@ const ProductDetailPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [qty, setQty] = useState(1);
 
-  // 🌟 2. 新增 state：用來儲存目前登入的使用者資訊
   const [currentUser, setCurrentUser] = useState(null);
 
   const [reviews, setReviews] = useState([]);
@@ -53,18 +51,17 @@ const ProductDetailPage = () => {
       }
     };
 
-    // 🌟 3. 新增邏輯：獲取目前登入的使用者
     const fetchCurrentUser = async () => {
       try {
         const response = await getMe();
-        setCurrentUser(response.data); // 將取得的使用者資料存入 state
+        setCurrentUser(response.data); 
       } catch (error) {
-        // 如果抓不到 (報 401)，代表是未登入的訪客，我們直接忽略，currentUser 會維持 null
+        console.error("獲取使用者資訊失敗", error);
       }
     };
 
     fetchProduct();
-    fetchCurrentUser(); // 🌟 執行獲取使用者身分
+    fetchCurrentUser();
   }, [id, navigate]);
 
   const handleToggleReviewLike = async (reviewId) => {
@@ -201,7 +198,7 @@ const ProductDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
+      <div className="min-h-screen bg-[#f5f5f5] dark:bg-slate-900 flex flex-col">
         <Navbar />
         <div className="flex-1 flex justify-center items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ee4d2d]"></div>
@@ -213,11 +210,11 @@ const ProductDetailPage = () => {
   if (!product) return null;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-slate-900 flex flex-col pb-20">
       <Navbar />
       
       <main className="max-w-6xl mx-auto px-0 sm:px-6 lg:px-8 py-6 w-full flex-1">
-        <div className="bg-white sm:rounded-md shadow-sm flex flex-col md:flex-row mb-6">
+        <div className="bg-white dark:bg-slate-800 sm:rounded-md shadow-sm flex flex-col md:flex-row mb-6">
           <div className="w-full md:w-112.5 shrink-0">
             <img 
               src={product.image_url || "https://picsum.photos/id/10/800/800"} 
@@ -294,7 +291,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        <div className="bg-white sm:rounded-md shadow-sm p-5 md:p-8">
+        <div className="bg-white dark:bg-slate-800 sm:rounded-md shadow-sm p-5 md:p-8">
           <h2 className="text-lg font-medium text-slate-800 mb-6 uppercase">商品評價 {reviewStats.total > 0 && <span className="text-sm text-slate-500 font-normal">({reviewStats.total})</span>}</h2>
           <div className="space-y-6">
             {reviews.length > 0 ? (
@@ -305,7 +302,6 @@ const ProductDetailPage = () => {
                   onToggleLike={handleToggleReviewLike} 
                   onDelete={handleDeleteReview}       
                   onUpdate={handleUpdateReview} 
-                  // 🌟 4. 將當前使用者的 ID 傳給子元件！
                   currentUserId={currentUser?.id} 
                 />
               ))
@@ -315,7 +311,7 @@ const ProductDetailPage = () => {
           </div>
           {hasMoreReviews && (
             <div className="mt-8 flex justify-center">
-              <button onClick={handleLoadMoreReviews} disabled={isLoadingReviews} className="px-8 py-2 bg-white border border-slate-300 text-slate-600 text-sm hover:bg-slate-50 transition-colors disabled:opacity-50">
+              <button onClick={handleLoadMoreReviews} disabled={isLoadingReviews} className="px-8 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-gray-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50">
                 {isLoadingReviews ? "載入中..." : "載入更多評價 ▼"}
               </button>
             </div>

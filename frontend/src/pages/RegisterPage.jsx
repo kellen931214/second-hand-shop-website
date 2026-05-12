@@ -34,17 +34,15 @@ const RegisterPage = () => {
         e.preventDefault();
         setErrorMessage('');
 
-        // 🌟 4. 送出前攔截：檢查密碼格式是否完全正確
         const currentPasswordError = validatePassword(password);
         if (currentPasswordError !== "") {
             setPasswordError(currentPasswordError);
-            return; // 終止執行，不打 API
+            return; 
         }
 
-        // 🌟 5. 送出前攔截：檢查兩次輸入是否一致
         if (password !== passwordConfirmation) {
             setErrorMessage('兩次輸入的密碼不一致！');
-            return; // 終止執行，不打 API
+            return; 
         }
 
         try {
@@ -62,47 +60,43 @@ const RegisterPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-            <form onSubmit={handleRegister} className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm flex flex-col gap-5">
-                <h1 className="text-2xl font-bold text-gray-800 text-center mb-2">歡迎註冊</h1>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4">
+            <form onSubmit={handleRegister} className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg w-full max-w-sm flex flex-col gap-5">
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center mb-2">歡迎註冊</h1>
                 
                 {errorMessage && (
-                    <div className="text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-lg text-sm">
+                    <div className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/30 px-4 py-3 rounded-lg text-sm">
                         {errorMessage}
                     </div>
                 )}
 
-                {/* 姓名與信箱欄位保持不變 */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-600">姓名</label>
-                    <input type="text" required onChange={(e) => setName(e.target.value)} placeholder="請輸入姓名" className="w-full rounded-lg border border-gray-300 px-4 py-2.5" />
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">姓名</label>
+                    <input type="text" required onChange={(e) => setName(e.target.value)} placeholder="請輸入姓名" className="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2.5 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-600">電子信箱</label>
-                    <input type="email" required onChange={(e) => setEmail(e.target.value)} placeholder="請輸入信箱" className="w-full rounded-lg border border-gray-300 px-4 py-2.5" />
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">電子信箱</label>
+                    <input type="email" required onChange={(e) => setEmail(e.target.value)} placeholder="請輸入信箱" className="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2.5 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
                 </div>
 
-                {/* 密碼欄位 */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-gray-600">密碼</label>
                     <input 
                         type="password" 
                         required 
                         value={password}
-                        onChange={handlePasswordChange} // 🌟 改用我們寫好的處理函式
+                        onChange={handlePasswordChange} 
                         placeholder="至少 8 碼，包含大小寫、數字與符號" 
                         className={`w-full rounded-lg border px-4 py-2.5 focus:outline-none ${
                             passwordError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-gray-500'
                         }`} 
                     />
-                    {/* 🌟 條件渲染：密碼格式有錯時，在這裡顯示紅色小字 */}
                     {passwordError && (
                         <span className="text-xs font-medium text-red-500">{passwordError}</span>
                     )}
                 </div>
 
-                {/* 確認密碼欄位保持不變 */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-gray-600">確認密碼</label>
                     <input 

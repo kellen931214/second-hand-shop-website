@@ -33,11 +33,9 @@ const HistoryPage = () => {
     fetchHistory();
   }, [page]);
 
-  // 🗑️ 呼叫 API 單筆刪除
   const handleDeleteItem = async (productId) => {
     try {
       await removeHistoryItem(productId);
-      // 刪除成功後，重新抓取目前的畫面更新列表
       fetchHistory();
     } catch (error) {
       console.error("移除歷史紀錄失敗", error);
@@ -45,7 +43,6 @@ const HistoryPage = () => {
     }
   };
 
-  // 🧹 呼叫 API 一鍵清空
   const handleClearAll = async () => {
     if (!window.confirm("確定要清空所有瀏覽紀錄嗎？這個動作無法復原喔！")) return;
     
@@ -65,21 +62,20 @@ const HistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex flex-col relative overflow-hidden">
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
-        <header className="mb-8 border-b border-slate-200 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <header className="mb-8 border-b border-slate-200 dark:border-slate-700 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
               <span className="text-indigo-500">🕒</span> 最近瀏覽過
             </h1>
-            <p className="text-sm text-slate-500 mt-2 font-medium">
+            <p className="text-sm text-slate-500 dark:text-gray-400 mt-2 font-medium">
               共 {pagination.total} 筆紀錄
             </p>
           </div>
           
-          {/* 一鍵清空按鈕 */}
           {history.length > 0 && (
             <button 
               onClick={handleClearAll}
@@ -102,7 +98,6 @@ const HistoryPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {history.map((item) => (
                 <div key={item.id} className="relative group">
-                  {/* 疊加在 ProductCard 右上角的移除按鈕 */}
                   <button 
                     onClick={() => handleDeleteItem(item.id)}
                     className="absolute top-2 right-2 z-20 p-2 bg-white/80 backdrop-blur-md text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-sm"
@@ -113,13 +108,11 @@ const HistoryPage = () => {
                     </svg>
                   </button>
                   
-                  {/* 你的商品卡片組件 */}
                   <ProductCard product={item} />
                 </div>
               ))}
             </div>
 
-            {/* 分頁按鈕 */}
             {pagination.lastPage > 1 && (
               <div className="flex items-center justify-center gap-4 mt-12 mb-8">
                 <button onClick={() => handlePageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1} className="px-4 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm">

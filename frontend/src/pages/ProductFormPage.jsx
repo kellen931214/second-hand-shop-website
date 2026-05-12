@@ -4,11 +4,10 @@ import axiosInstance from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 
 const ProductFormPage = () => {
-  const { id } = useParams(); // 🌟 抓取網址上的 ID (如果有設定的話)
-  const isEditMode = Boolean(id); // 判斷是否為編輯模式
+  const { id } = useParams(); 
+  const isEditMode = Boolean(id); 
   const navigate = useNavigate();
 
-  // 表單資料狀態
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -18,24 +17,20 @@ const ProductFormPage = () => {
     description: ''
   });
 
-  const [categories, setCategories] = useState([]); // 存放分類選項
-  const [isLoading, setIsLoading] = useState(isEditMode); // 如果是編輯模式，一開始要先 Loading 等資料
+  const [categories, setCategories] = useState([]); 
+  const [isLoading, setIsLoading] = useState(isEditMode); 
   const [errorMsg, setErrorMsg] = useState('');
 
-  // 1. 初始化資料 (抓取分類 & 抓取單筆商品資料)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 先去抓取你的分類清單 (對應你 web.php 的 /categories)
         const catRes = await axiosInstance.get('/categories');
         setCategories(catRes.data);
 
-        // 🌟 如果是編輯模式，加碼抓取該商品的原始資料
         if (isEditMode) {
           const prodRes = await axiosInstance.get(`/products/${id}`);
           const product = prodRes.data;
           
-          // 把抓到的資料塞進表單讓管理員修改
           setFormData({
             name: product.name || '',
             price: product.price || '',
@@ -56,7 +51,6 @@ const ProductFormPage = () => {
     fetchData();
   }, [id, isEditMode]);
 
-  // 2. 處理欄位變更
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -65,27 +59,22 @@ const ProductFormPage = () => {
     }));
   };
 
-  // 3. 送出表單
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
     try {
       if (isEditMode) {
-        // 🌟 編輯模式：打 PUT API (對應 ProductController@update)
         await axiosInstance.put(`/products/${id}`, formData);
         alert('商品更新成功！');
       } else {
-        // 🌟 新增模式：打 POST API (對應 ProductController@store)
         await axiosInstance.post('/products', formData);
         alert('商品發布成功！');
       }
       
-      // 成功後，跳轉回管理員列表頁
       navigate('/admin/products');
     } catch (error) {
       console.error("儲存失敗", error);
-      // 顯示 Laravel 傳回的驗證錯誤 (例如 422 Unprocessable Entity)
       setErrorMsg(error.response?.data?.message || '儲存失敗，請檢查欄位格式');
     }
   };
@@ -100,7 +89,7 @@ const ProductFormPage = () => {
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8">
           
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">
-            {isEditMode ? '✏️ 編輯商品' : '✨ 發布新商品'}
+            {isEditMode ? '編輯商品' : '發布新商品'}
           </h1>
 
           {errorMsg && (
@@ -111,7 +100,7 @@ const ProductFormPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* 區塊一：基本資訊 */}
+            {/* 基本資訊 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">商品名稱 *</label>
@@ -158,7 +147,6 @@ const ProductFormPage = () => {
               </div>
             </div>
 
-            {/* 區塊二：圖片與描述 */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">圖片網址 (URL)</label>
               <input 
@@ -185,7 +173,6 @@ const ProductFormPage = () => {
               ></textarea>
             </div>
 
-            {/* 按鈕區 */}
             <div className="flex justify-end gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
               <button 
                 type="button" 

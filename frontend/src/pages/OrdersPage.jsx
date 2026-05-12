@@ -1,9 +1,7 @@
-// src/pages/OrdersPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getOrders } from '../api/orderApi';
-// 🌟 1. 引入剛剛做好的新元件
 import OrderItem from '../components/OrderItem'; 
 
 const OrdersPage = () => {
@@ -27,22 +25,21 @@ const OrdersPage = () => {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-slate-900">
       <Navbar />
-      <div className="text-center py-20 italic text-slate-400">訂單載入中...</div>
+      <div className="text-center py-20 italic text-slate-400 dark:text-gray-500">訂單載入中...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-slate-900 flex flex-col">
       <Navbar />
       
       <main className="max-w-4xl mx-auto px-4 py-8 w-full flex-1">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">我的購買</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">我的購買</h1>
 
         {orders.length > 0 ? (
           <div className="space-y-4">
-            {/* 🌟 2. 簡化後的 map 區塊 */}
             {orders.map(order => (
               <OrderItem 
                 key={order.id} 
@@ -52,8 +49,8 @@ const OrdersPage = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white shadow-sm rounded-sm">
-            <p className="text-slate-500">目前沒有訂單紀錄。</p>
+          <div className="text-center py-20 bg-white dark:bg-slate-800 shadow-sm rounded-sm">
+            <p className="text-slate-500 dark:text-gray-400">目前沒有訂單紀錄。</p>
           </div>
         )}
       </main>

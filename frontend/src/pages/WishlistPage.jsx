@@ -40,16 +40,16 @@ const WishlistPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-900 flex flex-col relative overflow-hidden">
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
-        <header className="mb-8 border-b border-slate-200 pb-4 flex justify-between items-end">
+        <header className="mb-8 border-b border-slate-200 dark:border-slate-700 pb-4 flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
               <span className="text-red-500">❤️</span> 我的收藏清單
             </h1>
-            <p className="text-sm text-slate-500 mt-2 font-medium">
+            <p className="text-sm text-slate-500 dark:text-gray-400 mt-2 font-medium">
               共收藏了 {pagination.total} 件商品
             </p>
           </div>

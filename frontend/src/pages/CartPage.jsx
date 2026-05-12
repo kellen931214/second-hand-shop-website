@@ -5,6 +5,8 @@ import { getCartItems, updateCartItem, deleteCartItem } from '../api/cartApi';
 import { createOrder } from '../api/orderApi'; 
 import QuantitySelector from '../components/QuantitySelector'; 
 import CartProductInfo from '../components/CartProductInfo';
+import OrderSummary from '../components/OrderSummary';
+import EmptyCart from '../components/EmptyCart';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -47,9 +49,7 @@ const CartPage = () => {
     }
   };
 
-  // 🌟 2. 修改：函式改為直接接收「新數量 (newQty)」
   const handleQtyChange = async (productId, newQty) => {
-    // 移除原有的 delta 計算，因為 QuantitySelector 內部已經算好絕對值了
     if (newQty < 1 || isUpdating) return;
 
     setIsUpdating(true);
@@ -81,28 +81,26 @@ const CartPage = () => {
     }, 0);
   };
 
-  if (loading) return <div className="min-h-screen bg-[#f5f5f5]"><Navbar /><div className="text-center py-20">載入中...</div></div>;
+if (loading) return <div className="min-h-screen bg-[#f5f5f5] dark:bg-slate-900"><Navbar /><div className="text-center py-20 text-slate-600 dark:text-gray-300">載入中...</div></div>;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-slate-900 flex flex-col">
       <Navbar />
       
       <main className="max-w-5xl mx-auto px-4 py-8 w-full flex-1">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">購物車 ({cartItems.length})</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">購物車 ({cartItems.length})</h1>
 
         {cartItems.length > 0 ? (
           <div className="flex flex-col lg:flex-row gap-6">
             
             <div className="flex-1 space-y-4">
               {cartItems.map(item => (
-                <div key={item.id} className="bg-white p-4 rounded-sm shadow-sm flex items-center gap-4">
+                <div key={item.id} className="bg-white dark:bg-slate-800 p-4 rounded-sm shadow-sm flex items-center gap-4">
                   <CartProductInfo item={item} />
                   
-                  {/* 🌟 3. 替換：使用你的 QuantitySelector 元件 */}
                   <div className="shrink-0 -my-4 scale-90 origin-right"> 
                     <QuantitySelector 
                       qty={item.pivot.quantity} 
-                      // 參數說明：當子元件呼叫 setQty 時，觸發我們更新好的 handleQtyChange
                       setQty={(newQty) => handleQtyChange(item.id, newQty)} 
                       stock={item.stock} 
                     />
@@ -117,39 +115,15 @@ const CartPage = () => {
               ))}
             </div>
 
-            <div className="w-full lg:w-80 h-fit sticky top-24">
-              <div className="bg-white p-6 rounded-sm shadow-sm border-t-2 border-[#ee4d2d]">
-                <h3 className="text-lg font-bold mb-4">訂單摘要</h3>
-                <div className="flex justify-between text-sm mb-2 text-slate-600">
-                  <span>商品小計</span>
-                  <span>${calculateTotal()}</span>
-                </div>
-                <div className="flex justify-between text-sm mb-6 text-slate-600">
-                  <span>運費</span>
-                  <span className="text-green-600">免運</span>
-                </div>
-                <div className="border-t pt-4 flex justify-between items-end mb-6">
-                  <span className="font-bold">總計金額</span>
-                  <span className="text-2xl font-bold text-[#ee4d2d]">${calculateTotal()}</span>
-                </div>
-                
-                <button 
-                  onClick={handleCheckout}
-                  disabled={isSubmitting}
-                  className="w-full py-3 bg-[#ee4d2d] text-white font-bold hover:bg-[#d73211] transition-colors rounded-sm shadow-md disabled:bg-slate-400"
-                >
-                  {isSubmitting ? "正在下單..." : "下單"}
-                </button>
-              </div>
-            </div>
+            <OrderSummary 
+              total={calculateTotal()} 
+              onCheckout={handleCheckout} 
+              isSubmitting={isSubmitting} 
+            />
 
           </div>
         ) : (
-          <div className="text-center py-20 bg-white shadow-sm">
-            <div className="text-6xl mb-4">🛒</div>
-            <p className="text-slate-500 mb-6">購物車還是空的喔！</p>
-            <Link to="/" className="px-10 py-3 bg-[#ee4d2d] text-white font-bold rounded-sm hover:bg-[#d73211]">去逛逛商品</Link>
-          </div>
+          <EmptyCart />
         )}
       </main>
     </div>

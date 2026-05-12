@@ -12,7 +12,6 @@ const ReviewItem = ({ review, onToggleLike, onDelete, onUpdate, currentUserId })
     }
   };
 
-  // 🌟 判斷邏輯：目前登入者的 ID 是否等於這則留言的作者 ID
   const isMyReview = currentUserId === review.user?.id;
 
   return (
@@ -28,7 +27,6 @@ const ReviewItem = ({ review, onToggleLike, onDelete, onUpdate, currentUserId })
         <div className="flex justify-between items-start mb-1">
           <div className="text-xs text-slate-800 font-medium">{review.user?.name || "匿名買家"}</div>
           
-          {/* 🌟 條件渲染：只有是自己的評價時，才顯示編輯與刪除按鈕 */}
           {isMyReview && (
             <div className="flex gap-3 text-xs">
               <button 
@@ -47,7 +45,6 @@ const ReviewItem = ({ review, onToggleLike, onDelete, onUpdate, currentUserId })
           )}
         </div>
 
-        {/* 編輯模式與一般模式的切換 */}
         {isEditing ? (
           <div className="mt-2 bg-slate-50 p-3 rounded-md border border-slate-200 mb-3">
             <div className="mb-3 flex items-center gap-2">
@@ -90,7 +87,6 @@ const ReviewItem = ({ review, onToggleLike, onDelete, onUpdate, currentUserId })
           </>
         )}
         
-        {/* 時間與點讚區塊 */}
         <div className="flex justify-between items-center mt-3">
           <div className="text-xs text-slate-400">
             {new Date(review.created_at).toLocaleString()}

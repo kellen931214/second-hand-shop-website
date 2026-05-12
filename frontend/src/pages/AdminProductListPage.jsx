@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import Navbar from '../components/Navbar'; // 記得引入你的 Navbar
+import Navbar from '../components/Navbar'; 
 
 const AdminProductListPage = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 1. 取得所有商品資料
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axiosInstance.get('/products'); 
-        // Laravel paginate 回傳的實際陣列會包在 data 屬性裡面
         setProducts(response.data.data || response.data);
       } catch (error) {
         console.error("取得商品失敗", error);
@@ -25,14 +23,12 @@ const AdminProductListPage = () => {
     fetchProducts();
   }, []);
 
-  // 2. 刪除商品的邏輯
   const handleDelete = async (id) => {
     const isConfirmed = window.confirm("確定要刪除這個商品嗎？此操作無法復原。");
     if (!isConfirmed) return;
 
     try {
       await axiosInstance.delete(`/products/${id}`);
-      // 刪除成功後，即時更新畫面
       setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
       alert("商品已刪除！");
     } catch (error) {

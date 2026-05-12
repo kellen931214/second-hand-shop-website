@@ -1,10 +1,6 @@
-// src/components/OrderItem.jsx
 import React from 'react';
 
-// 指令：解構賦值 (Destructuring Assignment)
-// 用途：接收父層 (OrdersPage) 傳遞進來的 order 資料與 onClick 點擊事件
 const OrderItem = ({ order, onClick }) => {
-  // 邏輯整理：把原本寫在 JSX 裡的判斷式提早處理，讓畫面程式碼更乾淨
   const items = order.products || order.order_items || [];
   const previewItems = items.slice(0, 2);
   const remainingCount = items.length - 2;
@@ -37,7 +33,6 @@ const OrderItem = ({ order, onClick }) => {
           );
         })}
         
-        {/* 如果商品超過兩個，顯示更多提示 */}
         {remainingCount > 0 && (
           <div className="px-4 py-2 text-center text-xs text-slate-400 bg-slate-50">
             還有其他 {remainingCount} 件商品...
@@ -45,7 +40,6 @@ const OrderItem = ({ order, onClick }) => {
         )}
       </div>
 
-      {/* 訂單底部：顯示總金額 */}
       <div className="px-4 py-3 border-t border-slate-50 text-right">
         <span className="text-sm text-slate-600 mr-2">訂單總金額:</span>
         <span className="text-lg font-bold text-[#ee4d2d]">${order.total_price}</span>
