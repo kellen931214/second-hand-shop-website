@@ -12,7 +12,7 @@ const AIChatAssistant = () => {
         setLoading(true);
         setAnswer('');
         try {
-            const response = await axios.post('http://localhost:8000/ai/query-products', { query });
+            const response = await axios.post('`${import.meta.env.VITE_BACKEND_API_BASE}/ai/query-products`', { query });
             setAnswer(response.data.answer);
         } catch (error) {
             setAnswer("小幫手目前額度用完囉，請稍後再試！");
