@@ -1,0 +1,32 @@
+FROM composer:2 AS vendor
+WORKDIR /var/www/html
+
+# Remove --no-dev for seeder as a temperaroy workaround
+COPY composer.json composer.lock ./
+RUN composer install \
+	--prefer-dist \
+	--no-interaction \
+	--no-progress \
+	--optimize-autoloader \
+	--no-scripts
+
+FROM php:8.5-cli-alpine AS runtime
+WORKDIR /var/www/html
+
+RUN apk add --no-cache $PHPIZE_DEPS oniguruma-dev libxml2-dev sqlite-dev \
+	&& docker-php-ext-install pdo pdo_sqlite mbstring bcmath xml
+
+COPY . .
+
+COPY --from=vendor /var/www/html/vendor ./vendor
+
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh \
+	&& test -f .env || cp .env.example .env \
+	&& touch database/database.sqlite
+
+RUN php artisan package:discover
+
+EXPOSE 8000
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
