@@ -13,7 +13,7 @@ class ProductController extends Controller
     {
         $query = Product::query()
             ->withAvg('reviews', 'rating')
-            ->withCount('wishlistsByUsers') // 為了讓「最多收藏」能排序
+            ->withCount('wishlistsByUsers') 
             ->where('stock', '>', 0);
 
         if ($request->filled('key_word')){
@@ -45,7 +45,6 @@ class ProductController extends Controller
                     break;
             }
         } else {
-            // 預設排序：最新上架
             $query->latest();
         }
 

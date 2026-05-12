@@ -9,19 +9,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ReviewController extends Controller
 {
-    // 1. 取得某個商品的所有評價
     public function index($productId)
     {
         $product = Product::findOrFail($productId);
 
-        // 撈出評價，順便帶出留言者的名字，最新留言在最前
         $reviews = $product->reviews()
                            ->with('user:id,name') 
                            ->latest()
                            ->paginate(10);
 
         return response()->json([
-            'average_rating' => round($product->reviews()->avg('rating'), 1), // 計算平均星數
+            'average_rating' => round($product->reviews()->avg('rating'), 1), 
             'total_reviews' => $reviews->total(),
             'reviews' => $reviews
         ]);
@@ -32,7 +30,7 @@ class ReviewController extends Controller
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048' // 最多 2MB
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048' 
         ]);
 
         $product = Product::findOrFail($productId);
@@ -63,7 +61,6 @@ class ReviewController extends Controller
         ], 201);
     }
 
-    // 3. 修改評價
     public function update(Request $request, $id)
     {
         $review = Review::findOrFail($id);
@@ -78,7 +75,6 @@ class ReviewController extends Controller
             'comment' => 'nullable|string|max:500'
         ]);
 
-        // 4. 更新資料
         $review->update($validated);
 
         return response()->json([

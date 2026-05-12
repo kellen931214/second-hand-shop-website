@@ -15,6 +15,17 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        Category::factory(5)->create();
+        $categories = [
+            ['name' => '書籍教科書'],
+            ['name' => '電子產品'],
+            ['name' => '家具宿舍用品'],
+            ['name' => '衣服服飾'],
+            ['name' => '運動用品'],
+            ['name' => '生活用品'],
+        ];
+
+        foreach ($categories as $category) {
+            Category::create($category);
+        }
     }
 }
